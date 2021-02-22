@@ -86,11 +86,27 @@ public class Game {
 	boolean canAdvance(final Row row) {
 		if (row.isLocked())
 			return false;
-		if (this.activeRows.contains(row) && row.getFortschritt() != row.getMaxFortschritt())
+		if (this.activeRows.contains(row) && row.getFortschritt() < row.getMaxFortschritt())
 			return true;
 		if (this.activeRows.size() < 3)
 			return true;
 		return false;
+	}
+	
+	/**
+	 * Gibt an, ob in der ausgewählten Reihe zwei Fortschritte möglich sind.
+	 */
+	boolean canDoubleAdvance(final Row row) {
+		if (this.canAdvance(row) && row.getFortschritt() < row.getMaxFortschritt() - 1)
+			return true;
+		return false;
+	}
+	
+	/**
+	 * Gibt die Reihen zurück, in denen in der jetztigen Runde Fortschritte erzielt wurden
+	 */
+	HashSet<Row> getActiveRows() {
+		return this.activeRows;
 	}
 	
 }

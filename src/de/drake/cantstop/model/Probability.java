@@ -30,7 +30,12 @@ public class Probability {
 	/**
 	 * Die Anzahl günstiger, unsortierter Würfe, bei denen man keinen Fortschritt hat und "fizzlet".
 	 */
-	private int fizzle = 0;
+	private int fizzleKombi;
+	
+	/**
+	 * Der Erwartungswert für den Fortschritt nach einem weiteren Wurf (ohne Teilen durch Wurf.ANZAHL_UNSORTIERTER_WÜRFE)
+	 */
+	private double expectedRatingKombi;
 	
 	/**
 	 * Eine Liste aller möglichen sortierten Würfelwürfe
@@ -44,6 +49,7 @@ public class Probability {
 		Probability.instance = this;
 		this.initWürfe();
 		this.initEinzelprobs();
+		this.calc();
 	}
 	
 	/**
@@ -92,18 +98,31 @@ public class Probability {
 	public void calc() {
 		Game game = Game.getInstance();
 		
-		this.fizzle = 0;
+		this.fizzleKombi = 0;
+		this.expectedRatingKombi = 0.;
 		
 		for (Wurf wurf : this.alleWürfe) {
-			boolean fizzlet = true;
+			boolean fizzelt = true;
+			double maxRating = 0.;
 			for (ArrayList<Row> option : wurf.getOptionen()) {
-				if (game.canAdvance(option.get(0)) || game.canAdvance(option.get(1))) {
-					fizzlet = false;
-					break;
+				Row option1 = option.get(0);
+				Row option2 = option.get(1);
+				if (game.canAdvance(option1) || game.canAdvance(option2)) {
+					fizzelt = false;
+					if (game.canAdvance(option1))
+						maxRating = Math.max(option1.getNextRating(), maxRating);
+					if (game.canAdvance(option2))
+						maxRating = Math.max(option2.getNextRating(), maxRating);
+					if (option1 == option2 && game.canDoubleAdvance(option1))
+						maxRating = Math.max(option1.getDoubleRating(), maxRating);
+					if (option1 != option2 && game.canAdvance(option1) && game.canAdvance(option2))
+						maxRating = Math.max(option1.getNextRating() + option2.getNextRating(), maxRating);
 				}
 			}
-			if (fizzlet) {
-				this.fizzle += wurf.getKombinationen();
+			if (fizzelt) {
+				this.fizzleKombi += wurf.getKombinationen();
+			} else {
+				this.expectedRatingKombi += maxRating * wurf.getKombinationen();
 			}
 		}
 	}
@@ -115,7 +134,25 @@ public class Probability {
 	}
 	
 	public double getFizzleWahrscheinlichkeit() {
-		return this.fizzle / Wurf.ANZAHL_UNSORTIERTER_WÜRFE;
+		return this.fizzleKombi / Wurf.ANZAHL_UNSORTIERTER_WÜRFE;
+	}
+	
+	/**
+	 * Gibt eine Bewertungszahl zurück, die den aktuellen Fortschritt bemisst.
+	 */
+	public double getCurrentRating() {
+		double result = 0.;
+		for (Row row : Game.getInstance().getActiveRows()) {
+			result += row.getCurrentRating();
+		}
+		return result;
+	}
+	
+	/**
+	 * Gibt den Erwartungswert für den Fortschritt nach einem weiteren Wurf zurück.
+	 */
+	public double getExpectedRating() {
+		return (this.getCurrentRating() * (Wurf.ANZAHL_UNSORTIERTER_WÜRFE - this.fizzleKombi) + this.expectedRatingKombi) / Wurf.ANZAHL_UNSORTIERTER_WÜRFE;
 	}
 	
 }

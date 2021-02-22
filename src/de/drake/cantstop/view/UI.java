@@ -2,6 +2,8 @@ package de.drake.cantstop.view;
 
 import java.awt.BorderLayout;
 
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -26,6 +28,10 @@ public class UI extends JFrame{
 	private final Spielfeld spielfeld = new Spielfeld(this);
 	
 	JLabel fizzle = new JLabel("");
+	
+	JLabel currentRating = new JLabel("");
+	
+	JLabel expectedRating = new JLabel("");
 	
 	/**
 	 * Erzeugt eine neue UI zu dem angegebenen Spiel bzw. der angegebenen Probability.
@@ -61,9 +67,13 @@ public class UI extends JFrame{
 			buttonPanel.add(button_fail);
 		
 		JPanel infoPanel = new JPanel();
+		infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+		infoPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		this.add(infoPanel, BorderLayout.WEST);
 		
 			infoPanel.add(this.fizzle);
+			infoPanel.add(this.currentRating);
+			infoPanel.add(this.expectedRating);
 		
 		this.update();
 		this.setVisible(true);
@@ -74,7 +84,9 @@ public class UI extends JFrame{
 	 */
 	void update() {
 		this.spielfeld.update();
-		this.fizzle.setText("Fizzle-Chance: " + Math.round(Probability.getInstance().getFizzleWahrscheinlichkeit() * 1000)/10. + "%");
+		this.fizzle.setText("Fizzle-Chance: " + Math.round(Probability.getInstance().getFizzleWahrscheinlichkeit() * 1000.)/10. + "%");
+		this.currentRating.setText("Aktueller Fortschritt: " + Math.round(Probability.getInstance().getCurrentRating() * 1000.)/10.);
+		this.expectedRating.setText("Erwarteter Fortschritt: " + Math.round(Probability.getInstance().getExpectedRating() * 1000.)/10.);
 	}
 	
 }

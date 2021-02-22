@@ -79,6 +79,39 @@ public class Row implements Comparable<Row> {
 	}
 	
 	/**
+	 * Gibt eine Bewertungszahl zurück, die einen einfachen Fortschritt auf eine bestimmte Höhe repräsentiert.
+	 * Aktuell: Die Summe aller Höhen ist für jede Reihe stets 0,5.
+	 */
+	private double getRating(final int höhe) {
+		return ((double) höhe) / ((double) (this.maxFortschritt * (this.maxFortschritt + 1)));
+	}
+	
+	/**
+	 * Gibt eine Bewertungszahl zurück, die den aktuellen Gesamtfortschritt auf dieser Reihe bemisst.
+	 */
+	double getCurrentRating() {
+		double result = 0.;
+		for (int höhe = this.safeFortschritt + 1; fortschritt <= this.fortschritt; fortschritt++) {
+			result += this.getRating(höhe);
+		}
+		return result;
+	}
+	
+	/**
+	 * Gibt eine Bewertungszahl zurück, die einen möglichen Fortschritt um ein weiteres Feld auf dieser Reihe bemisst.
+	 */
+	double getNextRating() {
+		return this.getRating(this.fortschritt + 1);
+	}
+	
+	/**
+	 * Gibt eine Bewertungszahl zurück, die einen möglichen Fortschritt um zwei weitere Felder auf dieser Reihe bemisst.
+	 */
+	double getDoubleRating() {
+		return this.getRating(this.fortschritt + 2);
+	}
+	
+	/**
 	 * Gibt die Nummer der Reihe zurück.
 	 */
 	public int getNumber() {
