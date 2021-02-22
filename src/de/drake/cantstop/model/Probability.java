@@ -1,8 +1,9 @@
 package de.drake.cantstop.model;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
+
+import javafx.util.Pair;
 
 /**
  * Ein Modul für die Wahrscheinlichkeitsberechnung des aktuellen Spiels.
@@ -38,48 +39,19 @@ public class Probability {
 	private double expectedRatingKombi;
 	
 	/**
-	 * Eine Liste aller möglichen sortierten Würfelwürfe
-	 */
-	private final ArrayList<Wurf> alleWürfe = new ArrayList<Wurf>(126);
-	
-	/**
-	 * Erzeugt eine neues Probabilitymodul für das genannte Spiel.
+	 * Erzeugt eine neue Instanz von Probability.
 	 */
 	public Probability() {
 		Probability.instance = this;
-		this.initWürfe();
 		this.initEinzelprobs();
 		this.calc();
-	}
-	
-	/**
-	 * Initialisiert die möglichen sortierten Würfe.
-	 */
-	private void initWürfe() {
-		for (int w1 = 1; w1 < 7; w1++) {
-			for (int w2 = 1; w2 < 7; w2++) {
-				for (int w3 = 1; w3 < 7; w3++) {
-					for (int w4 = 1; w4 < 7; w4++) {
-						int[] unsortierterWurf = {w1, w2, w3, w4};
-						Arrays.sort(unsortierterWurf);
-						Wurf wurf = new Wurf(unsortierterWurf, 1);
-						int index = alleWürfe.indexOf(wurf);
-						if (index == -1) {
-							alleWürfe.add(wurf);
-						} else {
-							alleWürfe.get(index).addKombination();
-						}
-					}
-				}
-			}
-		}
 	}
 	
 	/**
 	 * Berechnet initial die Einzelwahrscheinlichkeiten.
 	 */
 	private void initEinzelprobs() {
-		for (Wurf wurf : this.alleWürfe) {
+		for (Wurf wurf : WurfManager.getAlleWürfe()) {
 			for (Row row : RowManager.getAllRows()) {
 				for (ArrayList<Row> option : wurf.getOptionen()) {
 					if (option.contains(row)) {
@@ -96,33 +68,15 @@ public class Probability {
 	 * Berechnet alle Wahrscheinlichkeiten neu.
 	 */
 	public void calc() {
-		Game game = Game.getInstance();
-		
 		this.fizzleKombi = 0;
 		this.expectedRatingKombi = 0.;
 		
-		for (Wurf wurf : this.alleWürfe) {
-			boolean fizzelt = true;
-			double maxRating = 0.;
-			for (ArrayList<Row> option : wurf.getOptionen()) {
-				Row option1 = option.get(0);
-				Row option2 = option.get(1);
-				if (game.canAdvance(option1) || game.canAdvance(option2)) {
-					fizzelt = false;
-					if (game.canAdvance(option1))
-						maxRating = Math.max(option1.getNextRating(), maxRating);
-					if (game.canAdvance(option2))
-						maxRating = Math.max(option2.getNextRating(), maxRating);
-					if (option1 == option2 && game.canDoubleAdvance(option1))
-						maxRating = Math.max(option1.getDoubleRating(), maxRating);
-					if (option1 != option2 && game.canAdvance(option1) && game.canAdvance(option2))
-						maxRating = Math.max(option1.getNextRating() + option2.getNextRating(), maxRating);
-				}
-			}
-			if (fizzelt) {
+		for (Wurf wurf : WurfManager.getAlleWürfe()) {
+			Pair<ArrayList<Row>, Double> bestOption = WurfManager.getBestOption(wurf);
+			if (bestOption.getKey() == null) {
 				this.fizzleKombi += wurf.getKombinationen();
 			} else {
-				this.expectedRatingKombi += maxRating * wurf.getKombinationen();
+				this.expectedRatingKombi += bestOption.getValue() * wurf.getKombinationen();
 			}
 		}
 	}
@@ -130,11 +84,11 @@ public class Probability {
 	public double getEinzelwahrscheinlichkeit(final Row row) {
 		if (!Game.getInstance().canAdvance(row))
 			return 0.;
-		return this.einzelhäufigkeiten.get(row) / Wurf.ANZAHL_UNSORTIERTER_WÜRFE;
+		return this.einzelhäufigkeiten.get(row) / WurfManager.ANZAHL_UNSORTIERTER_WÜRFE;
 	}
 	
 	public double getFizzleWahrscheinlichkeit() {
-		return this.fizzleKombi / Wurf.ANZAHL_UNSORTIERTER_WÜRFE;
+		return this.fizzleKombi / WurfManager.ANZAHL_UNSORTIERTER_WÜRFE;
 	}
 	
 	/**
@@ -152,7 +106,7 @@ public class Probability {
 	 * Gibt den Erwartungswert für den Fortschritt nach einem weiteren Wurf zurück.
 	 */
 	public double getExpectedRating() {
-		return (this.getCurrentRating() * (Wurf.ANZAHL_UNSORTIERTER_WÜRFE - this.fizzleKombi) + this.expectedRatingKombi) / Wurf.ANZAHL_UNSORTIERTER_WÜRFE;
+		return (this.getCurrentRating() * (WurfManager.ANZAHL_UNSORTIERTER_WÜRFE - this.fizzleKombi) + this.expectedRatingKombi) / WurfManager.ANZAHL_UNSORTIERTER_WÜRFE;
 	}
 	
 }

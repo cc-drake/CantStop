@@ -82,7 +82,7 @@ public class UI extends JFrame{
 	/**
 	 * Aktualisiert die GUI.
 	 */
-	void update() {
+	public void update() {
 		this.spielfeld.update();
 		this.fizzle.setText("Fizzle-Chance: " + Math.round(Probability.getInstance().getFizzleWahrscheinlichkeit() * 1000.)/10. + "%");
 		this.currentRating.setText("Aktueller Fortschritt: " + Math.round(Probability.getInstance().getCurrentRating() * 1000.)/10.);

@@ -8,9 +8,7 @@ import java.util.HashSet;
 /**
  * Ein sortierter Würfelwurf, d.h. die Würfel sind aufsteigend geordnet.
  */
-class Wurf {
-	
-	public final static double ANZAHL_UNSORTIERTER_WÜRFE = Math.pow(6, 4);
+public class Wurf {
 	
 	/**
 	 * Die Würfel des Wurfs
@@ -78,7 +76,7 @@ class Wurf {
 	 * Gibt die Wahrscheinlichkeit zurück, mit der der Wurf gewürfelt wird.
 	 */
 	double getProb() {
-		return ((double) this.kombinationen) / Wurf.ANZAHL_UNSORTIERTER_WÜRFE;
+		return ((double) this.kombinationen) / WurfManager.ANZAHL_UNSORTIERTER_WÜRFE;
 	}
 	
 	/**

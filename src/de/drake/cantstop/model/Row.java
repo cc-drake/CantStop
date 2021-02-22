@@ -91,7 +91,7 @@ public class Row implements Comparable<Row> {
 	 */
 	double getCurrentRating() {
 		double result = 0.;
-		for (int höhe = this.safeFortschritt + 1; fortschritt <= this.fortschritt; fortschritt++) {
+		for (int höhe = this.safeFortschritt + 1; höhe <= this.fortschritt; höhe++) {
 			result += this.getRating(höhe);
 		}
 		return result;
